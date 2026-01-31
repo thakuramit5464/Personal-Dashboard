@@ -9,6 +9,7 @@ import {
   BarChart,
   Settings,
   LogOut,
+  Menu,
 } from "lucide-react";
 import { SidebarUser } from "./SidebarUser";
 
@@ -114,19 +115,13 @@ export function Sidebar() {
         className="relative flex h-screen flex-col border-r bg-white dark:bg-gray-900 dark:border-gray-800 transition-all duration-300 ease-in-out group"
         style={{ width: isMobile ? (isCollapsed ? COLLAPSED_WIDTH : '100%') : currentWidth }}
     >
-      <div className={`flex h-16 items-center px-4 border-b dark:border-gray-800 shrink-0 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-        {!isCollapsed && (
-          <Link href="/dashboard" className="text-lg font-bold truncate hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-            Personal Dashboard
-          </Link>
-        )}
-        <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-            {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-        </button>
+      <div className={`flex h-16 items-center px-4 border-b dark:border-white/10 shrink-0 ${isCollapsed ? 'justify-center' : ''}`}>
+        <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+            PD
+            </div>
+            {!isCollapsed && <span className="text-lg font-bold text-gray-900 dark:text-white truncate">Personal Dashboard</span>}
+        </Link>
       </div>
       
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
@@ -149,6 +144,18 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="px-3 py-2 border-t dark:border-white/10">
+          <button
+              onClick={toggleSidebar}
+              className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+              {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+              {!isCollapsed && <span>Collapse Sidebar</span>}
+          </button>
+      </div>
+
       <SidebarUser isCollapsed={isCollapsed} />
 
       {/* Resize Handle */}
