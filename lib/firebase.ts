@@ -1,6 +1,6 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, Auth } from "firebase/auth";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,7 +11,27 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Initialize Firebase with Singleton Pattern
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  
+  // Initialize Firestore with offline persistence
+  db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+      })
+  });
+} else {
+  app = getApp();
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+export { app, auth, db };
+export const googleProvider = new GoogleAuthProvider();
+export const githubProvider = new GithubAuthProvider();
