@@ -19,8 +19,6 @@ export function SidebarUser({ isCollapsed }: SidebarUserProps) {
 
   const handleSignOut = async () => {
     try {
-      // Clear persistence to ensure no user data remains in IndexedDB
-      await clearIndexedDbPersistence(db);
       await signOut(auth);
       router.push("/login");
     } catch (error) {

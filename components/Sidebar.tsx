@@ -112,7 +112,7 @@ export function Sidebar() {
   return (
     <div 
         ref={sidebarRef}
-        className="relative flex h-screen flex-col border-r bg-white dark:bg-gray-900 dark:border-gray-800 transition-all duration-300 ease-in-out group"
+        className="relative flex h-full flex-col border-r bg-white dark:bg-gray-900 dark:border-gray-800 transition-all duration-300 ease-in-out group"
         style={{ width: isMobile ? (isCollapsed ? COLLAPSED_WIDTH : '100%') : currentWidth }}
     >
       <div className={`flex h-16 items-center px-4 border-b dark:border-white/10 shrink-0 ${isCollapsed ? 'justify-center' : ''}`}>

@@ -34,12 +34,12 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-black font-sans">
+    <div className="h-screen bg-gray-50 dark:bg-black font-sans flex overflow-hidden">
       <NetworkStatus />
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           <TopBar />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-8 scroll-smooth">
             {children}
           </main>
       </div>
