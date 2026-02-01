@@ -8,17 +8,17 @@ import {
   ListTodo,
   BarChart,
   Settings,
-  LogOut,
-  Menu,
+  Users,
+  FolderGit2
 } from "lucide-react";
 import { SidebarUser } from "./SidebarUser";
+import { useAuth } from "./AuthProvider";
 
-const navigation = [
+const baseNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Todos", href: "/dashboard/todos", icon: CheckSquare },
   { name: "Tasks", href: "/dashboard/tasks", icon: ListTodo },
   { name: "Progress", href: "/dashboard/progress", icon: BarChart },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 
@@ -40,6 +40,25 @@ export function Sidebar() {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Initialize state from local storage on mount
+  const { role } = useAuth();
+  
+  // Filter navigation based on role
+  // Everyone sees base items.
+  // Admins & Managers see Teams and Projects
+  // Employees/Partners see Projects (read only or assigned) - so they should see the link.
+  
+  // Let's just add them for everyone, but maybe order matters.
+  // Or if we want to restrict Teams creation to Admin/Manager, the page handles it.
+  // But usually "Teams" management is Admin/Manager.
+  // Let's add them to the list.
+  
+  const navigation = [
+      ...baseNavigation,
+      { name: "Teams", href: "/dashboard/teams", icon: Users },
+      { name: "Projects", href: "/dashboard/projects", icon: FolderGit2 },
+      { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  ];
+
   useEffect(() => {
     const savedState = localStorage.getItem("sidebarCollapsed");
     const savedWidth = localStorage.getItem("sidebarWidth");

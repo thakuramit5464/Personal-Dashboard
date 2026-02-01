@@ -27,7 +27,12 @@ interface Task {
   createdAt: any;
 }
 
-export function TaskManager() {
+interface TaskManagerProps {
+    context?: 'personal' | 'team' | 'project';
+    contextId?: string; // userId, teamId, or projectId
+}
+
+export function TaskManager({ context = 'personal', contextId }: TaskManagerProps) {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,13 +44,33 @@ export function TaskManager() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [dueDate, setDueDate] = useState("");
+  
+  // Determine collection path
+  const getCollectionPath = () => {
+      if (context === 'personal') return `users/${user?.uid}/tasks`;
+      // Note: For teams and projects, we might want top-level collections 
+      // or subcollections. Let's stick to subcollections for consistency if possible,
+      // or top-level 'tasks' with a field 'contextId'.
+      // Given the prompt "projects/{projectId}/tasks/{taskId}", we use subcollections.
+      if (context === 'project' && contextId) return `projects/${contextId}/tasks`;
+      // For teams, maybe "teams/{teamId}/tasks"? The prompt didn't strictly specify team tasks, 
+      // but said "Track tasks and todos per project". 
+      // However, "Admins and Managers: Can view and manage tasks and todos of all team members" implies visibility.
+      // Let's assume generic task support.
+      if (context === 'team' && contextId) return `teams/${contextId}/tasks`;
+      
+      return null;
+  }
 
   useEffect(() => {
     if (!user) return;
+    const path = getCollectionPath();
+    if (!path) return;
+    
     setError(null);
 
     const q = query(
-      collection(db, "users", user.uid, "tasks"),
+      collection(db, path),
       orderBy("createdAt", "desc")
     );
 
@@ -67,21 +92,23 @@ export function TaskManager() {
     );
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, context, contextId]);
 
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !user) return;
+    const path = getCollectionPath();
+    if (!title.trim() || !user || !path) return;
     setError(null);
 
     try {
-      await addDoc(collection(db, "users", user.uid, "tasks"), {
+      await addDoc(collection(db, path), {
         title,
         description,
         status: "pending",
         priority,
         dueDate,
         createdAt: serverTimestamp(),
+        createdBy: user.uid // Track who created it
       });
       setTitle("");
       setDescription("");
@@ -95,9 +122,10 @@ export function TaskManager() {
   };
 
   const updateStatus = async (id: string,  newStatus: "pending" | "in-progress" | "completed") => {
-      if(!user) return;
+      const path = getCollectionPath();
+      if(!user || !path) return;
       try {
-          await updateDoc(doc(db, "users", user.uid, "tasks", id), {
+          await updateDoc(doc(db, path, id), {
               status: newStatus
           });
       } catch (error: any) {
@@ -107,9 +135,10 @@ export function TaskManager() {
   }
 
   const deleteTask = async (id: string) => {
-    if (!user) return;
+    const path = getCollectionPath();
+    if (!user || !path) return;
     try {
-      await deleteDoc(doc(db, "users", user.uid, "tasks", id));
+      await deleteDoc(doc(db, path, id));
     } catch (error: any) {
       console.error("Error deleting task: ", error);
       setError("Failed to delete task.");
