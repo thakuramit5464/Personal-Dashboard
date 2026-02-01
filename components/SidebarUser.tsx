@@ -14,7 +14,7 @@ interface SidebarUserProps {
 }
 
 export function SidebarUser({ isCollapsed }: SidebarUserProps) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -55,6 +55,9 @@ export function SidebarUser({ isCollapsed }: SidebarUserProps) {
             <p className="text-xs text-gray-500 truncate" title={user.email || ""}>
               {user.email}
             </p>
+            <span className="inline-flex items-center mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 capitalize border border-gray-200 dark:border-gray-700">
+                {role || "guest"}
+            </span>
           </div>
         )}
       </div>

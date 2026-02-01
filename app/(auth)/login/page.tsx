@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { useState, useRef } from "react";
+import { signInWithEmailAndPassword, signInWithPopup, getMultiFactorResolver, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { auth, db, googleProvider, githubProvider } from "@/lib/firebase";
+import { auth, db, googleProvider } from "@/lib/firebase";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -13,6 +13,13 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  // MFA State
+  const [mfaResolver, setMfaResolver] = useState<any>(null);
+  const [verificationId, setVerificationId] = useState("");
+  const [code, setCode] = useState("");
+  const [showMfa, setShowMfa] = useState(false);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -20,37 +27,120 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === "auth/multi-factor-auth-required") {
+         setShowMfa(true);
+         setMfaResolver(getMultiFactorResolver(auth, err));
+         initMfa(getMultiFactorResolver(auth, err));
+      } else {
+         setError(err.message);
+      }
     }
   };
+
+  const initMfa = async (resolver: any) => {
+      // Find the enrolled phone factor
+      const phoneHint = resolver.hints.find((hint: any) => hint.factorId === PhoneMultiFactorGenerator.FACTOR_ID);
+      if (!phoneHint) {
+          setError("No supported second factor found.");
+          return;
+      }
+      
+      try {
+           if (!window.recaptchaVerifier) {
+              window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
+                  'size': 'invisible', 
+                  'callback': () => {}
+              });
+           }
+           const phoneAuthProvider = new PhoneAuthProvider(auth);
+           const vId = await phoneAuthProvider.verifyPhoneNumber(
+                {
+                    multiFactorHint: phoneHint,
+                    session: resolver.session
+                },
+                window.recaptchaVerifier
+           );
+           setVerificationId(vId);
+      } catch(err: any) {
+          setError("Failed to send MFA code: " + err.message);
+      }
+  }
+
+  const handleVerifyMfa = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+          const cred = PhoneAuthProvider.credential(verificationId, code);
+          const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+          await mfaResolver.resolveSignIn(multiFactorAssertion);
+          router.push("/dashboard");
+      } catch (err: any) {
+          setError(err.message);
+      }
+  }
 
   const handleSocialLogin = async (provider: any) => {
     setError("");
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Check if user exists (in case they login with social without "signup")
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || "",
-          photoURL: user.photoURL || "",
-          provider: provider.providerId,
-          createdAt: new Date().toISOString(),
-        });
-      }
-
+      
+      // Check for user existence logic remains same... 
+      // Simplified here for brevity as we focus on MFA which might also trigger on Social Login if enabled.
+       const user = result.user;
+       const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+            await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "",
+            photoURL: user.photoURL || "",
+            role: "employee",
+            provider: provider.providerId,
+            createdAt: new Date().toISOString(),
+            });
+        }
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message);
+        if (err.code === "auth/multi-factor-auth-required") {
+             setShowMfa(true);
+             setMfaResolver(getMultiFactorResolver(auth, err));
+             initMfa(getMultiFactorResolver(auth, err));
+        } else {
+            setError(err.message);
+        }
     }
   };
 
+  if (showMfa) {
+      return (
+          <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12 max-w-md mx-auto mt-10">
+              <h2 className="text-2xl font-bold text-center mb-6">Two-Factor Authentication</h2>
+              <p className="text-sm text-gray-500 text-center mb-6">Enter the code sent to your phone.</p>
+              
+               <div ref={recaptchaContainerRef}></div>
+               
+              <form onSubmit={handleVerifyMfa} className="space-y-6">
+                <input
+                     type="text"
+                     placeholder="Enter verification code"
+                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                     value={code}
+                     onChange={(e) => setCode(e.target.value)}
+                />
+                <button
+                    type="submit"
+                    className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                    Verify
+                </button>
+                 {error && <div className="text-red-500 text-sm">{error}</div>}
+              </form>
+          </div>
+      );
+  }
+
   return (
     <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+      <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
       <div className="mb-6 text-center">
         <h2 className="text-3xl font-bold tracking-tight text-gray-900">
           Log in
@@ -68,18 +158,12 @@ export default function LoginPage() {
 
       <div className="space-y-6">
         <div>
-           <div className="grid grid-cols-2 gap-3">
+           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => handleSocialLogin(googleProvider)}
               className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               Google
-            </button>
-            <button
-              onClick={() => handleSocialLogin(githubProvider)}
-              className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              GitHub
             </button>
            </div>
            <div className="relative mt-6">
@@ -116,12 +200,20 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
+            <div className="flex justify-between items-center">
+                <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+                >
+                Password
+                </label>
+                <Link 
+                    href="/forgot-password"
+                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                    Forgot password?
+                </Link>
+            </div>
             <div className="mt-1">
               <input
                 id="password"

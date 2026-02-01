@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, sendEmailVerification, updateProfile } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { auth, db, googleProvider, githubProvider } from "@/lib/firebase";
+import { auth, db, googleProvider } from "@/lib/firebase";
 import Link from "next/link";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -24,14 +25,19 @@ export default function SignupPage() {
       );
       const user = userCredential.user;
 
+      await updateProfile(user, { displayName: name });
+
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
-        name: user.displayName || "",
+        name: name,
         photoURL: user.photoURL || "",
+        role: "employee",
         provider: "email",
         createdAt: new Date().toISOString(),
       });
+      
+      await sendEmailVerification(user);
 
       router.push("/dashboard");
     } catch (err: any) {
@@ -83,19 +89,14 @@ export default function SignupPage() {
 
       <div className="space-y-6">
         <div>
-           <div className="grid grid-cols-2 gap-3">
+           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => handleSocialLogin(googleProvider)}
               className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               Google
             </button>
-            <button
-              onClick={() => handleSocialLogin(githubProvider)}
-              className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              GitHub
-            </button>
+
            </div>
            <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
@@ -110,6 +111,26 @@ export default function SignupPage() {
         </div>
 
         <form className="space-y-6" onSubmit={handleSignup}>
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Full Name
+            </label>
+            <div className="mt-1">
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div>
             <label
               htmlFor="email"
@@ -129,6 +150,7 @@ export default function SignupPage() {
               />
             </div>
           </div>
+
 
           <div>
             <label

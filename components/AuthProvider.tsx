@@ -2,68 +2,60 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { AppUser, UserRole } from "@/lib/roles";
+import { UserRole } from "@/lib/roles";
 
 interface AuthContextType {
     user: User | null;
-    appUser: AppUser | null;
     role: UserRole | null;
     loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
-    appUser: null,
     role: null,
     loading: true,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [appUser, setAppUser] = useState<AppUser | null>(null);
+    const [role, setRole] = useState<UserRole | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                try {
-                    const userDocRef = doc(db, "users", firebaseUser.uid);
-                    const userSnapshot = await getDoc(userDocRef);
-
-                    if (userSnapshot.exists()) {
-                        setAppUser(userSnapshot.data() as AppUser);
-                    } else {
-                        // Create their profile if it doesn't exist
-                        const newUser: AppUser = {
-                            uid: firebaseUser.uid,
-                            name: firebaseUser.displayName,
-                            email: firebaseUser.email,
-                            photoURL: firebaseUser.photoURL,
-                            role: "employee", // Default role
-                            createdAt: serverTimestamp(),
-                        };
-                        await setDoc(userDocRef, newUser);
-                        setAppUser(newUser); // Optimistic update
-                    }
-                } catch (error) {
-                    console.error("Error fetching user profile:", error);
-                }
-            } else {
-                setAppUser(null);
-            }
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             setUser(firebaseUser);
-            setLoading(false);
+            
+            if (firebaseUser) {
+                // Subscribe to user document for live role updates
+                const unsubDoc = onSnapshot(doc(db, "users", firebaseUser.uid), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        // Safely cast role, defaulting to 'employee' if missing or invalid
+                        const userRole = (userData.role as UserRole) || "employee";
+                        setRole(userRole);
+                    } else {
+                        setRole(null);
+                    }
+                    setLoading(false);
+                }, (error) => {
+                    console.error("Error fetching user role:", error);
+                    setLoading(false);
+                });
+                
+                return () => unsubDoc();
+            } else {
+                setRole(null);
+                setLoading(false);
+            }
         });
 
         return () => unsubscribe();
     }, []);
 
-    const role = appUser?.role || null;
-
     return (
-        <AuthContext.Provider value={{ user, appUser, role, loading }}>
+        <AuthContext.Provider value={{ user, role, loading }}>
             {children}
         </AuthContext.Provider>
     );

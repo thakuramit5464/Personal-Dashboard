@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, GithubAuthProvider, Auth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -34,4 +34,3 @@ if (!getApps().length) {
 
 export { app, auth, db };
 export const googleProvider = new GoogleAuthProvider();
-export const githubProvider = new GithubAuthProvider();

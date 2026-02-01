@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { TopBar } from "@/components/TopBar";
+import { VerifyEmailNotice } from "@/components/VerifyEmailNotice";
 
 export default function DashboardLayout({
   children,
@@ -40,7 +41,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           <TopBar />
           <main className="flex-1 overflow-y-auto p-4 sm:p-8 scroll-smooth">
-            {children}
+            {!user.emailVerified ? <VerifyEmailNotice /> : children}
           </main>
       </div>
     </div>
