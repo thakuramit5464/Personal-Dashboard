@@ -9,7 +9,8 @@ import {
   BarChart,
   Settings,
   Users,
-  FolderGit2
+  FolderGit2,
+  CalendarClock
 } from "lucide-react";
 import { SidebarUser } from "./SidebarUser";
 import { useAuth } from "./AuthProvider";
@@ -55,6 +56,7 @@ export function Sidebar() {
   const navigation = [
       ...baseNavigation,
       { name: "Teams", href: "/dashboard/teams", icon: Users },
+      { name: "Attendance", href: "/dashboard/attendance", icon: CalendarClock },
       { name: "Projects", href: "/dashboard/projects", icon: FolderGit2 },
       { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
