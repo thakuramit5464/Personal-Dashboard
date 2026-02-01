@@ -1,18 +1,10 @@
-import { TeamMembers } from "@/components/teams/TeamMembers";
-import { ProjectList } from "@/components/projects/ProjectList";
-import { getTeam } from "@/lib/teams";
-import { notFound } from "next/navigation";
-
-// Since this is a server component in App directory (by default), 
-// we can fetch data directly or use a client component wrapper.
-// To keep it simple and dynamic with the Auth context (client-side usually), 
-// we will make this a Client Component or fetch on client.
-// However, params are available. Let's make it a Client Component for easiest auth integration.
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { TeamMembers } from "@/components/teams/TeamMembers";
+import { ProjectList } from "@/components/projects/ProjectList";
+import { getTeam } from "@/lib/teams";
 import { Team } from "@/lib/roles";
 
 export default function TeamDetailsPage() {
