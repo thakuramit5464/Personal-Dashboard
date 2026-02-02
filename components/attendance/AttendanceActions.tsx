@@ -1,39 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { CameraCapture } from "./CameraCapture";
 import { uploadImage } from "@/lib/cloudinary";
-import { clockIn, clockOut, getLatestAttendance, AttendanceRecord } from "@/lib/attendance";
-import { Loader2, LogIn, LogOut, CheckCircle } from "lucide-react";
+import { startSession, endSession } from "@/lib/attendance";
+import { useAttendanceSession } from "@/hooks/useAttendanceSession";
+import { AttendanceTimer } from "./AttendanceTimer";
+import { Loader2, LogIn, LogOut } from "lucide-react";
 
 export function AttendanceActions() {
   const { user } = useAuth();
-  const [status, setStatus] = useState<"loading" | "clocked_in" | "clocked_out">("loading");
+  const { activeSession, elapsedSeconds, loading, refreshSession } = useAttendanceSession();
   const [showCamera, setShowCamera] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [lastRecord, setLastRecord] = useState<AttendanceRecord | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      loadStatus();
-    }
-  }, [user]);
-
-  const loadStatus = async () => {
-    if (!user) return;
-    try {
-      const record = await getLatestAttendance(user.uid);
-      setLastRecord(record);
-      if (record && record.type === "clock_in") {
-        setStatus("clocked_in");
-      } else {
-        setStatus("clocked_out");
-      }
-    } catch (error) {
-      console.error("Error loading attendance status:", error);
-    }
-  };
 
   const handleCapture = async (file: File) => {
     if (!user) return;
@@ -41,13 +21,13 @@ export function AttendanceActions() {
     try {
       const imageUrl = await uploadImage(file);
       
-      if (status === "clocked_out") {
-        await clockIn(user.uid, imageUrl);
+      if (activeSession && activeSession.status === "active") {
+        await endSession(user.uid, activeSession.id, imageUrl);
       } else {
-        await clockOut(user.uid, imageUrl);
+        await startSession(user.uid, imageUrl);
       }
       
-      await loadStatus(); // Refresh status
+      await refreshSession(); 
       setShowCamera(false);
     } catch (error) {
       console.error("Error processing attendance:", error);
@@ -57,15 +37,17 @@ export function AttendanceActions() {
     }
   };
 
-  if (status === "loading") {
+  if (loading) {
     return <div className="flex items-center gap-2 p-4 text-gray-500"><Loader2 className="h-4 w-4 animate-spin" /> Loading status...</div>;
   }
+
+  const isClockedIn = activeSession?.status === "active";
 
   if (showCamera) {
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {status === "clocked_out" ? "Clock In Verification" : "Clock Out Verification"}
+          {!isClockedIn ? "Clock In Verification" : "Clock Out Verification"}
         </h3>
         {processing ? (
              <div className="flex flex-col items-center justify-center p-12 space-y-4 border rounded-lg bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800">
@@ -87,15 +69,18 @@ export function AttendanceActions() {
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Attendance</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-            Current Status: 
-            <span className={`ml-2 font-semibold ${status === "clocked_in" ? "text-green-600" : "text-gray-600"}`}>
-              {status === "clocked_in" ? "Clocked In" : "Clocked Out"}
-            </span>
-          </p>
-          {lastRecord && (
+          <div className="mt-2 flex items-center gap-4">
+               <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Current Status: 
+                    <span className={`ml-2 font-semibold ${isClockedIn ? "text-green-600" : "text-gray-600"}`}>
+                    {isClockedIn ? "Clocked In" : "Clocked Out"}
+                    </span>
+               </p>
+               {isClockedIn && <AttendanceTimer seconds={elapsedSeconds} />}
+          </div>
+          {activeSession?.status === "active" && (
              <p className="text-xs text-gray-400 mt-2">
-                 Last activity: {lastRecord.type === "clock_in" ? "Clocked In" : "Clocked Out"} at {lastRecord.timestamp?.toDate().toLocaleString()}
+                 Session started at {activeSession.clockInAt?.toDate().toLocaleTimeString()}
              </p>
           )}
         </div>
@@ -105,12 +90,12 @@ export function AttendanceActions() {
           disabled={processing}
           className={`
             flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-colors
-            ${status === "clocked_out" 
+            ${!isClockedIn
                 ? "bg-indigo-600 hover:bg-indigo-700" 
                 : "bg-red-500 hover:bg-red-600"}
           `}
         >
-          {status === "clocked_out" ? (
+          {!isClockedIn ? (
             <>
               <LogIn className="h-5 w-5" /> Clock In
             </>

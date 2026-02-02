@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { ProfileCard } from "@/components/ProfileCard";
 import { ProgressSummary } from "@/components/ProgressSummary";
 import { DashboardShortcuts } from "@/components/DashboardShortcuts";
+import { DashboardAttendanceWidget } from "@/components/DashboardAttendanceWidget";
 import { Sparkles } from "lucide-react";
 
 export default function DashboardPage() {
@@ -52,15 +53,7 @@ export default function DashboardPage() {
                              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Recent Activity</h3>
                              <button className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">View all</button>
                         </div>
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-                                <Sparkles className="h-6 w-6 text-gray-400" />
-                            </div>
-                            <p className="text-gray-900 dark:text-white font-medium">No recent activity</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Your recent tasks and updates will appear here.
-                            </p>
-                        </div>
+                        <DashboardAttendanceWidget />
                     </div>
                 </div>
 
