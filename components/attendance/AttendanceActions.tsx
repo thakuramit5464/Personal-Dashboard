@@ -51,7 +51,7 @@ export function AttendanceActions() {
         </h3>
         {processing ? (
              <div className="flex flex-col items-center justify-center p-12 space-y-4 border rounded-lg bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800">
-                <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+                <Loader2 className="h-8 w-8 text-primary animate-spin" />
                 <p className="text-gray-600 dark:text-gray-400">Uploading and syncing...</p>
              </div>
         ) : (
@@ -91,7 +91,7 @@ export function AttendanceActions() {
           className={`
             flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-colors
             ${!isClockedIn
-                ? "bg-indigo-600 hover:bg-indigo-700" 
+                ? "bg-primary hover:bg-primary-hover" 
                 : "bg-red-500 hover:bg-red-600"}
           `}
         >

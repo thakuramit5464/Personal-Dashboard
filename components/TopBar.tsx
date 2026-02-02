@@ -30,7 +30,7 @@ export function TopBar() {
 
       <div className="flex items-center gap-4">
          {/* Search Placeholder */}
-         <div className="hidden md:flex items-center gap-2 rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 border border-transparent focus-within:border-indigo-500 transition-colors cursor-text">
+         <div className="hidden md:flex items-center gap-2 rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 border border-transparent focus-within:border-primary transition-colors cursor-text">
             <Search className="h-4 w-4" />
             <span className="mr-4">Search...</span>
             <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded border bg-white px-1.5 font-mono text-[10px] font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">

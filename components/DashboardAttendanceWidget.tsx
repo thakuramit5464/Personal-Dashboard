@@ -13,16 +13,16 @@ export function DashboardAttendanceWidget() {
 
   if (activeSession && activeSession.status === "active") {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-center bg-indigo-50 dark:bg-indigo-900/10 rounded-lg border border-indigo-100 dark:border-indigo-500/20">
+      <div className="flex flex-col items-center justify-center py-8 text-center bg-primary-light/50 dark:bg-primary/5 rounded-lg border border-primary-light dark:border-primary/20">
         <div className="flex items-center gap-2 mb-2">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
-            <span className="text-indigo-900 dark:text-indigo-200 font-medium">Currently Clocked In</span>
+            <span className="text-primary-hover dark:text-primary-light font-medium">Currently Clocked In</span>
         </div>
         <AttendanceTimer seconds={elapsedSeconds} />
-        <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2">
+        <p className="text-xs text-primary dark:text-primary mt-2">
             Started: {activeSession.clockInAt?.toDate().toLocaleTimeString()}
         </p>
       </div>

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Personal Dashboard",
-  description: "A personal dashboard app",
+  title: "Avenir Tech Company Portal",
+  description: "Enterprise portal for Avenir Tech Ventures",
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";

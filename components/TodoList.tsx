@@ -117,12 +117,12 @@ export function TodoList() {
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
           placeholder="Add a new todo..."
-          className="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-3 pl-4 pr-12 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:text-white"
+          className="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-3 pl-4 pr-12 shadow-sm focus:border-primary focus:ring-primary dark:text-white"
         />
         <button
           type="submit"
           disabled={!newTodo.trim()}
-          className="absolute right-2 top-2 rounded-md bg-indigo-600 p-1 text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="absolute right-2 top-2 rounded-md bg-primary p-1 text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
         >
           <Plus className="h-5 w-5" />
         </button>

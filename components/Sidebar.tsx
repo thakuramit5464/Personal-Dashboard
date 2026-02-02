@@ -138,10 +138,10 @@ export function Sidebar() {
     >
       <div className={`flex h-16 items-center px-4 border-b dark:border-white/10 shrink-0 ${isCollapsed ? 'justify-center' : ''}`}>
         <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-            PD
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+            AT
             </div>
-            {!isCollapsed && <span className="text-lg font-bold text-gray-900 dark:text-white truncate">Personal Dashboard</span>}
+            {!isCollapsed && <span className="text-lg font-bold text-gray-900 dark:text-white truncate">Avenir Tech</span>}
         </Link>
       </div>
       
@@ -155,7 +155,7 @@ export function Sidebar() {
               title={isCollapsed ? item.name : ""}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
+                  ? "bg-primary-light text-primary dark:bg-primary/20 dark:text-primary"
                   : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               } ${isCollapsed ? 'justify-center' : ''}`}
             >
@@ -182,7 +182,7 @@ export function Sidebar() {
       {/* Resize Handle */}
       {!isCollapsed && !isMobile && (
           <div
-              className={`absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-indigo-500 transition-colors ${isResizing ? 'bg-indigo-500' : 'bg-transparent'}`}
+              className={`absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary transition-colors ${isResizing ? 'bg-primary' : 'bg-transparent'}`}
               onMouseDown={startResizing}
           />
       )}

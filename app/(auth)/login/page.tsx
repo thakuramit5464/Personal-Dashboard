@@ -122,13 +122,13 @@ export default function LoginPage() {
                 <input
                      type="text"
                      placeholder="Enter verification code"
-                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
                      value={code}
                      onChange={(e) => setCode(e.target.value)}
                 />
                 <button
                     type="submit"
-                    className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="flex w-full justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                     Verify
                 </button>
@@ -149,7 +149,7 @@ export default function LoginPage() {
           Don't have an account?{" "}
           <Link
             href="/signup"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-primary hover:text-primary-hover"
           >
             Sign up
           </Link>
@@ -161,7 +161,7 @@ export default function LoginPage() {
            <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => handleSocialLogin(googleProvider)}
-              className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Google
             </button>
@@ -192,7 +192,7 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 required
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -209,7 +209,7 @@ export default function LoginPage() {
                 </label>
                 <Link 
                     href="/forgot-password"
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    className="text-sm font-medium text-primary hover:text-primary-hover"
                 >
                     Forgot password?
                 </Link>
@@ -220,7 +220,7 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -232,7 +232,7 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="flex w-full justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Log in
             </button>
